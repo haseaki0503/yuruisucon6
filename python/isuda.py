@@ -176,7 +176,7 @@ def get_login():
 def post_login():
     name = request.form['name']
     cur = dbh().cursor()
-    cur.execute("SELECT * FROM user WHERE name = %s", (name, ))
+    cur.execute("SELECT password,salt,id FROM user WHERE name = %s", (name, ))
     row = cur.fetchone()
     if row == None or row['password'] != hashlib.sha1((row['salt'] + request.form['password']).encode('utf-8')).hexdigest():
         abort(403)

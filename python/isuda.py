@@ -91,8 +91,6 @@ def get_initialize():
     cur.execute('DELETE FROM entry WHERE id > 7101')
     origin = config('isutar_origin')
     urllib.request.urlopen(origin + '/initialize')
-    cur = dbh().cursor()
-    cur.execute('TRUNCATE star')
     return jsonify(result = 'ok')
 
 @app.route('/')
@@ -223,36 +221,6 @@ def delete_keyword(keyword):
     cur.execute('DELETE FROM entry WHERE keyword = %s', (keyword,))
 
     return redirect('/')
-
-@app.route("/stars")
-def get_stars():
-    cur = dbh().cursor()
-    cur.execute('SELECT * FROM star WHERE keyword = %s', (request.args['keyword'], ))
-return jsonify(stars = cur.fetchall())
-
-@app.route("/stars", methods=['POST'])
-def post_stars():
-    keyword = request.args.get('keyword', "")
-    if keyword == None or keyword == "":
-        keyword = request.form['keyword']
-
-    origin = os.environ.get('ISUDA_ORIGIN', 'http://localhost:5000')
-    url = "%s/keyword/%s" % (origin, urllib.parse.quote(keyword))
-    try:
-        urllib.request.urlopen(url)
-    except urllib.error.HTTPError as e:
-        if e.status == 404:
-            abort(404)
-        else:
-            raise
-
-    cur = dbh().cursor()
-    user = request.args.get('user', "")
-    if user == None or user == "":
-        user = request.form['user']
-
-    cur.execute('INSERT INTO star (keyword, user_name, created_at) VALUES (%s, %s, NOW())', (keyword, user))
-return jsonify(result = 'ok')
 
 def htmlify(content):
     if content == None or content == '':
